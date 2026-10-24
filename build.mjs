@@ -7,10 +7,14 @@ async function walk(dir) {
     const path = join(dir, entry.name);
     if (entry.isDirectory()) await walk(path);
     else if (entry.name.endsWith(".b64")) {
+      const text = (await readFile(path, "utf8")).replace(/\s/g, "");
+      if (text.length < 1000) {
+        console.log("skip", path);
+        continue;
+      }
       const out = path.slice(0, -4);
       await mkdir(dirname(out), { recursive: true });
-      const text = await readFile(path, "utf8");
-      await writeFile(out, Buffer.from(text.trim(), "base64"));
+      await writeFile(out, Buffer.from(text, "base64"));
       console.log(out);
     }
   }
